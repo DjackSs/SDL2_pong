@@ -1,7 +1,12 @@
 
+# GNU compiler
 CC=gcc
-includeFlag=./i686-w64-mingw32/include/SDL2
-libFlag=./i686-w64-mingw32/lib
+
+# path to SDL2 headers
+includeSDL2=./i686-w64-mingw32/include/SDL2
+
+#path to SDL2 libraies
+libSDL2=./i686-w64-mingw32/lib
 
 bin/sdl: 
-	${CC} src/*.c src/*.h -o bin/pong -I ${includeFlag} -L ${libFlag} -lmingw32 -lSDL2main -lSDL2
+	${CC} src/*.c src/*.h -o bin/pong -I ${includeSDL2} -L ${libSDL2} -lmingw32 -lSDL2main -lSDL2
