@@ -31,8 +31,8 @@ run [pong.exe](/bin/pong.exe) and you are good to go.
 #### Makefile
 
 In the [makefile](/makefile):
--Change the includeSDL2 path to where the SDL2 header files are in your system (/include/SDL)
--Change the libSDL2 path to where the SDL2 libraries files are in your system (/lib)
+* Change the includeSDL2 path to where the SDL2 header files are in your system (/include/SDL)
+* Change the libSDL2 path to where the SDL2 libraries files are in your system (/lib)
 
 By default, the SDL2 files are set up in the root of the project.
 

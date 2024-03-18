@@ -8,6 +8,7 @@
 //======================================================
 //utility
 
+
 void errorHandeler(SDL_Renderer *renderer, SDL_Window *window, char *message)
 {
     SDL_Log("Erreure : %s, %s\n", message, SDL_GetError());
@@ -43,21 +44,25 @@ void brickplacement(game *game, SDL_Renderer *prenderer, SDL_Window *pwindow)
             errorHandeler(prenderer, pwindow, "ERROR when creating a brick");
         }
 
+        if(count >= 7)
+        {
+            count = 0;
+            posY += 50;
+        }
 
         (*(*game).bricks[i]).rectangle.x = (*game).brickGap + (count*((*game).brickGap+(*(*game).bricks[i]).rectangle.w));
-        (*(*game).bricks[i]).rectangle.y = posY;
-
-
+/*
         if(((*(*game).bricks[i]).rectangle.x +(*(*game).bricks[i]).rectangle.w) >= (*game).width)
         {
             count = 0;
             posY += 50;
 
-        (*(*game).bricks[i]).rectangle.x = (*game).brickGap + (count*((*game).brickGap+(*(*game).bricks[i]).rectangle.w));
-        (*(*game).bricks[i]).rectangle.y = posY;
-            
-
+            (*(*game).bricks[i]).rectangle.x = (*game).brickGap + (count*((*game).brickGap+(*(*game).bricks[i]).rectangle.w));
+ 
         }
+*/
+
+        (*(*game).bricks[i]).rectangle.y = posY;
 
         count++;
 
@@ -296,6 +301,7 @@ void drawBall(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow)
         SDL_FPoint point1;
         SDL_FPoint point2;
 
+        // Pythagore shenanigan
         point1.x = (*ball).center.x + i;
         point1.y = (*ball).center.y + sqrtf(((*ball).radius*(*ball).radius)-((point1.x-(*ball).center.x)*(point1.x-(*ball).center.x)));
 
@@ -412,13 +418,9 @@ void breakoutInit(game *game, pongElement *paddle, pongBall *ball)
     //game init
     (*game).width = 800;
     (*game).height = 600;
-    //the ball crosses the height in 3 seconds
-    //600px/3s = 200px/1000ms 
-    //1px/5ms = velocity
-    //time = 1px/velocity
-    (*game).clock = 5;
-    (*game).brickNumber = 40;
-    (*game).brickGap = 10;
+    (*game).clock = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
+    (*game).brickNumber = 42;
+    (*game).brickGap = 12;
     (*game).bricks = NULL;
 
 
@@ -435,16 +437,16 @@ void breakoutInit(game *game, pongElement *paddle, pongBall *ball)
     (*paddle).dirX = 0;
     (*paddle).dirY = 0;
     (*paddle).speed = 5;
-    (*paddle).rectangle.x = 50;
+    (*paddle).rectangle.x = 350;
     (*paddle).rectangle.y = 570;
     (*paddle).rectangle.w = 100;
     (*paddle).rectangle.h = 20;
 
     //ball init
     (*ball).center.x = 400;
-    (*ball).center.y = 300;
+    (*ball).center.y = 400;
     (*ball).radius = 5;
-    (*ball).resolution = 0.1;
+    (*ball).resolution = 0.1; //define the shape of the ball, smaller = rounder = more resource intensive
     (*ball).colorRGB[0] = 0;
     (*ball).colorRGB[1] = 250;
     (*ball).colorRGB[2] = 250;
@@ -541,11 +543,7 @@ void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall
     //game init
     (*game).width = 800;
     (*game).height = 600;
-    //the ball crosses the height in 3 seconds
-    //600px/3s = 200px/1000ms 
-    //1px/5ms = velocity
-    //time = 1px/velocity
-    (*game).clock = 5;
+    (*game).clock = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
 
 
 
@@ -576,7 +574,7 @@ void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall
     (*ball).center.x = 400;
     (*ball).center.y = 300;
     (*ball).radius = 5;
-    (*ball).resolution = 0.1;
+    (*ball).resolution = 0.1; //define the shape of the ball, smaller = rounder = more resource intensive
     (*ball).colorRGB[0] = 0;
     (*ball).colorRGB[1] = 250;
     (*ball).colorRGB[2] = 250;
