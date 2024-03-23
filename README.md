@@ -25,7 +25,7 @@ run [pong.exe](/bin/pong.exe) and you are good to go.
 
 ### Code
 
-* The project is pre-configured to compile with the GNU Compiler Collection
+* The project is pre-configured to compile with the GNU Compiler Collection for Windows (MinGW)
 * The [SDL2 Library](https://www.libsdl.org/) is needed
 
 #### Makefile

@@ -5,7 +5,7 @@ CC=gcc
 # path to SDL2 headers
 includeSDL2=./i686-w64-mingw32/include/SDL2
 
-#path to SDL2 libraies
+# path to SDL2 libraies
 libSDL2=./i686-w64-mingw32/lib
 
 bin/sdl: 
