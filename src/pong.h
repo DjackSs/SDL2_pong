@@ -40,33 +40,24 @@ typedef struct pongBall
 
 } pongBall;
 
+#define WINDOW_WITH 800
+#define WINDOW_HEIGHT 600
+
 //------------------------------------------------
 
 //main function
+void sdlInit(char *choice);
+
 void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow);
 void breakoutInit(game *game, pongElement *paddle, pongBall *ball);
 
 void pongGame(SDL_Renderer *prenderer, SDL_Window *pwindow);
 void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball);
 
-//draw function
-void cleanRender(SDL_Renderer *prenderer, SDL_Window *pwindow);
-void drawBall(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow);
-void drawPongElement(pongElement *element, SDL_Renderer *prenderer, SDL_Window *pwindow);
-
-//control function
+//controller function
 void controller(SDL_Event event, pongElement *element);
 void pongController(SDL_Event event, pongElement *paddleP1, pongElement *paddleP2);
-void paddleOutControl(game game, pongElement *paddle);
-void ballGameControl(pongBall *ball, game game);
-void ballOnPaddleControl(pongBall *ball, pongElement paddle);
-void ballOnBricksControl(pongBall *ball, game game);
 
-//utility function
-void errorHandeler(SDL_Renderer *renderer, SDL_Window *window, char *message);
-pongElement* brickGenerator(pongElement *pBrick);
-void brickplacement(game *game, SDL_Renderer *prenderer, SDL_Window *pwindow);
-void clearBrick(pongElement *pBrick);
 
 
 #endif

@@ -9,12 +9,10 @@
 
 #include "pong.h"
 
-#define WINDOW_WITH 800
-#define WINDOW_HEIGHT 600
+
 
 //------------------------------------------------
 
-void sdlInit(char *choice);
 void purge (char *string);
 
 //------------------------------------------------
@@ -51,66 +49,7 @@ int main (int argc , char * *argv)
 
 //------------------------------------------------
 
-void sdlInit(char *choice)
-{
-    
-    //---------------------------------------------------------------
-    //init SDL
 
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
-    {
-        errorHandeler(NULL, NULL, "SDL initialization ERROR");
-    }
-
-
-    //---------------------
-    //WINDOW
-
-    SDL_Window *pwindow = NULL;
-
-    pwindow = SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WITH, WINDOW_HEIGHT, 0);
-    if(pwindow == NULL)
-    {
-        errorHandeler(NULL, pwindow, "ERROR creating SDL window");
-    }
-
-    //---------------------
-    //RENDERER
-
-    SDL_Renderer *prenderer = NULL;
-
-    prenderer = SDL_CreateRenderer(pwindow, -1, SDL_RENDERER_ACCELERATED);
-    if(prenderer == NULL)
-    {
-         errorHandeler(prenderer, pwindow, "ERROR creating SDL render");
-    }
-
-    //---------------------
-    // game
-
-    switch(choice[0])
-    {
-        case '1':
-            breakoutGame(prenderer, pwindow);
-            break;
-        case '2':
-            pongGame(prenderer, pwindow);
-            break;
-        default:
-            break;
-    }
-    
-
-
-    //---------------------
-    //close SDL
-
-    SDL_DestroyRenderer(prenderer);
-    SDL_DestroyWindow(pwindow);
-    SDL_Quit();
-
-
-}
 
 void purge (char *string)
 {

@@ -1,331 +1,78 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include<math.h>
 
 #include "pong.h"
+#include "draw.h"
+#include "control.h"
+#include "utility.h"
 
-//======================================================
-//utility
-
-
-void errorHandeler(SDL_Renderer *renderer, SDL_Window *window, char *message)
-{
-    SDL_Log("Erreure : %s, %s\n", message, SDL_GetError());
-
-    if(renderer != NULL)
-    {
-        SDL_DestroyRenderer(renderer);
-    }
-
-    if(window != NULL)
-    {
-        SDL_DestroyWindow(window);
-    }
-
-    SDL_Quit();
-    exit(-1);
-
-}
-
-//------------------------------------------------
-
-void brickplacement(game *game, SDL_Renderer *prenderer, SDL_Window *pwindow)
-{
-    int count = 0;
-    int posY = 50;
-
-    for(int i = 0; i<(*game).brickNumber; i++)
-    {
-        (*game).bricks[i] = brickGenerator((*game).bricks[i]);
-
-        if((*game).bricks[i] == NULL)
-        {
-            errorHandeler(prenderer, pwindow, "ERROR when creating a brick");
-        }
-
-        if(count >= 7)
-        {
-            count = 0;
-            posY += 50;
-        }
-
-        (*(*game).bricks[i]).rectangle.x = (*game).brickGap + (count*((*game).brickGap+(*(*game).bricks[i]).rectangle.w));
-/*
-        if(((*(*game).bricks[i]).rectangle.x +(*(*game).bricks[i]).rectangle.w) >= (*game).width)
-        {
-            count = 0;
-            posY += 50;
-
-            (*(*game).bricks[i]).rectangle.x = (*game).brickGap + (count*((*game).brickGap+(*(*game).bricks[i]).rectangle.w));
- 
-        }
-*/
-
-        (*(*game).bricks[i]).rectangle.y = posY;
-
-        count++;
-
-    }
-  
-}
-
-//------------------------------------------------
-
-pongElement* brickGenerator(pongElement *pBrick)
-{
-    int width = 100;
-    int height = 20;
-    int red = 215;
-    int green = 24;
-    int blue = 202;
-
-    pBrick = calloc(1, sizeof(pongElement));
-    if(pBrick == NULL)
-    {
-        return NULL;
-    }
-
-    (*pBrick).rectangle.w = width;
-    (*pBrick).rectangle.h = height;
-    (*pBrick).colorRGB[0] = red;
-    (*pBrick).colorRGB[1] = green;
-    (*pBrick).colorRGB[2] = blue;
-
-    return pBrick;
-
-}
-
-//------------------------------------------------
-
-void clearBrick(pongElement *pBrick)
-{
-    free(pBrick);
-}
-
-//======================================================
-//control
-
-void controller(SDL_Event event, pongElement *paddle)
-{
-    switch(event.key.keysym.sym)
-    {
-        case SDLK_LEFT:
-            (*paddle).dirX = -1;
-            break;
-        case SDLK_RIGHT:
-            (*paddle).dirX = 1;
-            break;
-        default:
-            break;
-    }
-
-}
-
-//------------------------------------------------
-
-void pongController(SDL_Event event, pongElement *paddleP1, pongElement *paddleP2)
-{
-    switch(event.key.keysym.sym)
-    {
-        case SDLK_UP:
-            (*paddleP1).dirY = -1;
-            break;
-        case SDLK_DOWN:
-            (*paddleP1).dirY = 1;
-            break;
-        case SDLK_z:
-            (*paddleP2).dirY = -1;
-            break;
-        case SDLK_s:
-            (*paddleP2).dirY = 1;
-            break;
-        default:
-            break;
-    }
-
-}
-
-//------------------------------------------------
-
-void paddleOutControl(game game, pongElement *paddle)
-{
-    //horizontal controls
-    if((*paddle).rectangle.x - (*paddle).speed <= 0 && (*paddle).dirX == -1)
-    {
-        (*paddle).dirX = 0;   
-    }
-
-    if((*paddle).rectangle.x + (*paddle).rectangle.w + (*paddle).speed >= 800 && (*paddle).dirX == 1)
-    {
-        (*paddle).dirX = 0;
-    }
-
-    //vertical controls
-    if((*paddle).rectangle.y - (*paddle).speed <= 0 && (*paddle).dirY == -1)
-    {
-        (*paddle).dirY = 0;   
-    }
-
-    if((*paddle).rectangle.y + (*paddle).rectangle.h + (*paddle).speed >= 600 && (*paddle).dirY == 1)
-    {
-        (*paddle).dirY = 0;
-    }
-
-}
-
-//------------------------------------------------
-
-void ballGameControl(pongBall *ball, game game)
-{
-    //lose
-    if(((*ball).center.y + (*ball).radius) >= game.height)
-    {
-        //(*ball).speed = 0;
-        (*ball).dirY *= -1;
-    }
-
-    if(((*ball).center.y - (*ball).radius) <= 0)
-    {
-        (*ball).dirY *= -1;
-    }
-
-    if(((*ball).center.x - (*ball).radius) <= 0)
-    {
-        (*ball).dirX *= -1;
-    }
-
-    if(((*ball).center.x + (*ball).radius) >= game.width)
-    {
-        (*ball).dirX *= -1;
-    }
-
-}
-
-//------------------------------------------------
-
-void ballOnPaddleControl(pongBall *ball, pongElement paddle)
-{
-    
-   if(((*ball).center.y + (*ball).radius) >= paddle.rectangle.y && (((*ball).center.y + (*ball).radius) <= paddle.rectangle.y + paddle.rectangle.h))
-   {
-        if((*ball).center.x >= paddle.rectangle.x && ( ((*ball).center.x - (*ball).radius) <= (paddle.rectangle.x + paddle.rectangle.w) ))
-        {
-            if(paddle.rectangle.w > 50)
-            {
-                (*ball).dirY *= -1;
-
-                (*ball).dirX = paddle.dirX;
-
-            }
-            else
-            {
-                (*ball).dirX *= -1;
-
-                (*ball).dirY = paddle.dirY;
-
-            }
-            
-        }
-   }
-
-
-}
-
-//------------------------------------------------
-
-void ballOnBricksControl(pongBall *ball, game game)
-{
-    for(int i=0; i<game.brickNumber; i++)
-    {
-        if(((*ball).center.y + (*ball).radius) >= (*game.bricks[i]).rectangle.y && ((*ball).center.y - + (*ball).radius) <=  (*game.bricks[i]).rectangle.y +(*game.bricks[i]).rectangle.h)
-        {
-             if((*ball).center.x >= (*game.bricks[i]).rectangle.x && ( ((*ball).center.x - (*ball).radius) <= ((*game.bricks[i]).rectangle.x + (*game.bricks[i]).rectangle.w) ))
-             {
-                (*ball).dirY *= -1;
-
-                (*game.bricks[i]).rectangle.x = 0;
-                (*game.bricks[i]).rectangle.y = 0;
-                (*game.bricks[i]).rectangle.w = 0;
-                (*game.bricks[i]).rectangle.h = 0;
-             }
-
-        }
-    }
-
-}
-
-//======================================================
-//draw
-
-
-void cleanRender(SDL_Renderer *prenderer, SDL_Window *pwindow)
-{
-    if(SDL_SetRenderDrawColor(prenderer, 0, 0, 0, SDL_ALPHA_OPAQUE) != 0)
-    {
-        errorHandeler(prenderer, pwindow, "ERREUR du changement de la couleurte du rendu");
-    }
-
-    SDL_RenderClear(prenderer);
-
-}
-
-//------------------------------------------------
-
-void drawPongElement(pongElement *element, SDL_Renderer *prenderer, SDL_Window *pwindow)
-{
-    
-    if(SDL_SetRenderDrawColor(prenderer, (*element).colorRGB[0], (*element).colorRGB[1], (*element).colorRGB[2], SDL_ALPHA_OPAQUE) != 0)
-    {
-        errorHandeler(prenderer, pwindow, "ERROR when changing render color");
-    }
-
-    if(SDL_RenderFillRect(prenderer, &(*element).rectangle) != 0)
-    {
-        errorHandeler(prenderer, pwindow, "ERROR while drawing rectangle");
-    }
-
-}
-
-//------------------------------------------------
-
-void drawBall(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow)
-{
-    if(SDL_SetRenderDrawColor(prenderer, (*ball).colorRGB[0], (*ball).colorRGB[1], (*ball).colorRGB[2], SDL_ALPHA_OPAQUE) != 0)
-    {
-        errorHandeler(prenderer, pwindow, "ERROR when changing render color");
-    }
-
-    for (double i=0; i<=(*ball).radius; i+= (*ball).resolution)
-    {
-        SDL_FPoint point1;
-        SDL_FPoint point2;
-
-        // Pythagore shenanigan
-        point1.x = (*ball).center.x + i;
-        point1.y = (*ball).center.y + sqrtf(((*ball).radius*(*ball).radius)-((point1.x-(*ball).center.x)*(point1.x-(*ball).center.x)));
-
-
-        point2.x = (*ball).center.x - i;
-        point2.y = (*ball).center.y - sqrtf(((*ball).radius*(*ball).radius)-((point1.x-(*ball).center.x)*(point1.x-(*ball).center.x)));
-
-
-        if(SDL_RenderDrawLine(prenderer,  point1.x, point1.y , point2.x, point2.y) != 0)
-        {
-            errorHandeler(prenderer, pwindow, "ERROR drawing a line 1 of the ball");
-        }
-
-        if(SDL_RenderDrawLine(prenderer, point2.x, point1.y ,  point1.x, point2.y) != 0)
-        {
-             errorHandeler(prenderer, pwindow, "ERROR drawing a line 2 of the ball");
-        }
-
-    }
-
-}
 
 //======================================================
 //main
+
+void sdlInit(char *choice)
+{
+    
+    //---------------------------------------------------------------
+    //init SDL
+
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
+    {
+        errorHandeler(NULL, NULL, "SDL initialization ERROR");
+    }
+
+
+    //---------------------
+    //window
+
+    SDL_Window *pwindow = NULL;
+
+    pwindow = SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WITH, WINDOW_HEIGHT, 0);
+    if(pwindow == NULL)
+    {
+        errorHandeler(NULL, pwindow, "ERROR creating SDL window");
+    }
+
+    //---------------------
+    //render
+
+    SDL_Renderer *prenderer = NULL;
+
+    prenderer = SDL_CreateRenderer(pwindow, -1, SDL_RENDERER_ACCELERATED);
+    if(prenderer == NULL)
+    {
+         errorHandeler(prenderer, pwindow, "ERROR creating SDL render");
+    }
+
+    //---------------------
+    // game
+
+    switch(choice[0])
+    {
+        case '1':
+            breakoutGame(prenderer, pwindow);
+            break;
+        case '2':
+            pongGame(prenderer, pwindow);
+            break;
+        default:
+            break;
+    }
+    
+
+
+    //---------------------
+    //close SDL
+
+    SDL_DestroyRenderer(prenderer);
+    SDL_DestroyWindow(pwindow);
+    SDL_Quit();
+
+
+}
+
+//------------------------------------------------
 
 void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
 {
@@ -376,6 +123,9 @@ void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
         ballOnPaddleControl(&ball, paddle);
         ballOnBricksControl(&ball, game);
 
+        //lose
+        if(ball.speed <= 0) program_launched = SDL_FALSE;
+
         //update
         paddle.rectangle.x += (paddle.dirX*paddle.speed);
         ball.center.x += (ball.dirX*ball.speed);
@@ -416,8 +166,8 @@ void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
 void breakoutInit(game *game, pongElement *paddle, pongBall *ball)
 {
     //game init
-    (*game).width = 800;
-    (*game).height = 600;
+    (*game).width = WINDOW_WITH;
+    (*game).height = WINDOW_HEIGHT;
     (*game).clock = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
     (*game).brickNumber = 42;
     (*game).brickGap = 12;
@@ -541,10 +291,10 @@ void pongGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
 void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
 {
     //game init
-    (*game).width = 800;
-    (*game).height = 600;
+    (*game).width = WINDOW_WITH;
+    (*game).height = WINDOW_HEIGHT;
     (*game).clock = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
-
+    (*game).brickNumber = 0;
 
 
     //paddle init
@@ -584,6 +334,47 @@ void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall
 
 }
 
+//------------------------------------------------
+
+void controller(SDL_Event event, pongElement *paddle)
+{
+    switch(event.key.keysym.sym)
+    {
+        case SDLK_LEFT:
+            (*paddle).dirX = -1;
+            break;
+        case SDLK_RIGHT:
+            (*paddle).dirX = 1;
+            break;
+        default:
+            break;
+    }
+
+}
+
+//------------------------------------------------
+
+void pongController(SDL_Event event, pongElement *paddleP1, pongElement *paddleP2)
+{
+    switch(event.key.keysym.sym)
+    {
+        case SDLK_UP:
+            (*paddleP1).dirY = -1;
+            break;
+        case SDLK_DOWN:
+            (*paddleP1).dirY = 1;
+            break;
+        case SDLK_z:
+            (*paddleP2).dirY = -1;
+            break;
+        case SDLK_s:
+            (*paddleP2).dirY = 1;
+            break;
+        default:
+            break;
+    }
+
+}
 
 
 
