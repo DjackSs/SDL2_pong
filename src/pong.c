@@ -195,8 +195,8 @@ void breakoutInit(game *game, pongElement *paddle, pongBall *ball)
     //ball init
     (*ball).center.x = 400;
     (*ball).center.y = 400;
-    (*ball).radius = 5;
-    (*ball).resolution = 0.1; //define the shape of the ball, smaller = rounder = more resource intensive
+    (*ball).radius = 8;
+    (*ball).resolution = 1; //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
     (*ball).colorRGB[0] = 0;
     (*ball).colorRGB[1] = 250;
     (*ball).colorRGB[2] = 250;
@@ -324,7 +324,7 @@ void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall
     (*ball).center.x = 400;
     (*ball).center.y = 300;
     (*ball).radius = 5;
-    (*ball).resolution = 0.1; //define the shape of the ball, smaller = rounder = more resource intensive
+    (*ball).resolution = 1;  //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
     (*ball).colorRGB[0] = 0;
     (*ball).colorRGB[1] = 250;
     (*ball).colorRGB[2] = 250;

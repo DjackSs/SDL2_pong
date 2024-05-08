@@ -44,35 +44,34 @@ void drawPongElement(pongElement *element, SDL_Renderer *prenderer, SDL_Window *
 
 void drawBall(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow)
 {
+   
     if(SDL_SetRenderDrawColor(prenderer, (*ball).colorRGB[0], (*ball).colorRGB[1], (*ball).colorRGB[2], SDL_ALPHA_OPAQUE) != 0)
     {
         errorHandeler(prenderer, pwindow, "ERROR when changing render color");
     }
 
+    SDL_Rect innerRect;
+    
     for (double i=0; i<=(*ball).radius; i+= (*ball).resolution)
     {
-        SDL_FPoint point1;
-        SDL_FPoint point2;
-
+        
         // Pythagore shenanigan
-        point1.x = (*ball).center.x + i;
-        point1.y = (*ball).center.y + sqrtf(((*ball).radius*(*ball).radius)-((point1.x-(*ball).center.x)*(point1.x-(*ball).center.x)));
+        
+        innerRect.x = (*ball).center.x - i;
 
+        int yAxisLength = sqrtf(((*ball).radius*(*ball).radius)-((innerRect.x-(*ball).center.x)*(innerRect.x-(*ball).center.x)));
+        innerRect.y = (*ball).center.y - yAxisLength;
 
-        point2.x = (*ball).center.x - i;
-        point2.y = (*ball).center.y - sqrtf(((*ball).radius*(*ball).radius)-((point1.x-(*ball).center.x)*(point1.x-(*ball).center.x)));
+        innerRect.w = i*2;
+        innerRect.h = 2*yAxisLength;
 
-
-        if(SDL_RenderDrawLine(prenderer,  point1.x, point1.y , point2.x, point2.y) != 0)
+        if(SDL_RenderFillRect(prenderer, &innerRect) != 0)
         {
-            errorHandeler(prenderer, pwindow, "ERROR drawing a line 1 of the ball");
+            errorHandeler(prenderer, pwindow, "ERROR while drawing rectangle");
         }
 
-        if(SDL_RenderDrawLine(prenderer, point2.x, point1.y ,  point1.x, point2.y) != 0)
-        {
-             errorHandeler(prenderer, pwindow, "ERROR drawing a line 2 of the ball");
-        }
 
     }
 
+    
 }
