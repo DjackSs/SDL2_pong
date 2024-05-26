@@ -10,10 +10,13 @@ typedef struct game
 {
     int width;
     int height;
-    int clock;
+    int delta;
     int brickNumber;
     int brickGap;
+    char type; // 0 = breakout, 1 = pong
+    int score[2];
     struct pongElement **bricks;
+
 } game;
 
 // pong element
@@ -46,17 +49,18 @@ typedef struct pongBall
 //------------------------------------------------
 
 //main function
-void sdlInit(char *choice);
+void pong_sdl_init(char *choice);
 
-void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow);
-void breakoutInit(game *game, pongElement *paddle, pongBall *ball);
+void pong_breakout_init(game *game, pongElement *paddle, pongBall *ball);
+void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
 
-void pongGame(SDL_Renderer *prenderer, SDL_Window *pwindow);
-void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball);
+void pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball);
+void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
+
 
 //controller function
-void controller(SDL_Event event, pongElement *element);
-void pongController(SDL_Event event, pongElement *paddleP1, pongElement *paddleP2);
+void pong_breakout_controller(SDL_Event event, pongElement *element);
+void pong_pong_controller(SDL_Event event, pongElement *paddleP1, pongElement *paddleP2);
 
 
 

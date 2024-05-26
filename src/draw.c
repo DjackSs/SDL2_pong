@@ -12,11 +12,11 @@
 //draw
 
 
-void cleanRender(SDL_Renderer *prenderer, SDL_Window *pwindow)
+void draw_clean_render(SDL_Renderer *prenderer, SDL_Window *pwindow)
 {
     if(SDL_SetRenderDrawColor(prenderer, 0, 0, 0, SDL_ALPHA_OPAQUE) != 0)
     {
-        errorHandeler(prenderer, pwindow, "ERREUR du changement de la couleurte du rendu");
+        utility_error_handeler(prenderer, pwindow, "ERREUR du changement de la couleurte du rendu");
     }
 
     SDL_RenderClear(prenderer);
@@ -25,29 +25,29 @@ void cleanRender(SDL_Renderer *prenderer, SDL_Window *pwindow)
 
 //------------------------------------------------
 
-void drawPongElement(pongElement *element, SDL_Renderer *prenderer, SDL_Window *pwindow)
+void draw_pong_element(pongElement *element, SDL_Renderer *prenderer, SDL_Window *pwindow)
 {
     
     if(SDL_SetRenderDrawColor(prenderer, (*element).colorRGB[0], (*element).colorRGB[1], (*element).colorRGB[2], SDL_ALPHA_OPAQUE) != 0)
     {
-        errorHandeler(prenderer, pwindow, "ERROR when changing render color");
+        utility_error_handeler(prenderer, pwindow, "ERROR when changing render color");
     }
 
     if(SDL_RenderFillRect(prenderer, &(*element).rectangle) != 0)
     {
-        errorHandeler(prenderer, pwindow, "ERROR while drawing rectangle");
+        utility_error_handeler(prenderer, pwindow, "ERROR while drawing rectangle");
     }
 
 }
 
 //------------------------------------------------
 
-void drawBall(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow)
+void draw_ball(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow)
 {
    
     if(SDL_SetRenderDrawColor(prenderer, (*ball).colorRGB[0], (*ball).colorRGB[1], (*ball).colorRGB[2], SDL_ALPHA_OPAQUE) != 0)
     {
-        errorHandeler(prenderer, pwindow, "ERROR when changing render color");
+        utility_error_handeler(prenderer, pwindow, "ERROR when changing render color");
     }
 
     SDL_Rect innerRect;
@@ -67,7 +67,7 @@ void drawBall(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow)
 
         if(SDL_RenderFillRect(prenderer, &innerRect) != 0)
         {
-            errorHandeler(prenderer, pwindow, "ERROR while drawing rectangle");
+            utility_error_handeler(prenderer, pwindow, "ERROR while drawing rectangle");
         }
 
 

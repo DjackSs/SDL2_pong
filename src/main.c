@@ -13,7 +13,7 @@
 
 //------------------------------------------------
 
-void purge (char *string);
+void stdin_purge(char *string);
 
 //------------------------------------------------
 
@@ -33,11 +33,11 @@ int main (int argc , char * *argv)
         printf("3 - Exit\n");
 
        fgets(choice, 3, stdin);
-       purge(choice);
+       stdin_purge(choice);
 
         if(choice[0] == '1' || choice[0] == '2')
         {
-            sdlInit(choice);
+            pong_sdl_init(choice);
         }
 
     }
@@ -51,7 +51,7 @@ int main (int argc , char * *argv)
 
 
 
-void purge (char *string)
+void stdin_purge(char *string)
 {
     if(string[strlen(string)-1] != '\n')
     {

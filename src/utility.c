@@ -8,7 +8,7 @@
 //utility
 
 
-void errorHandeler(SDL_Renderer *renderer, SDL_Window *window, char *message)
+void utility_error_handeler(SDL_Renderer *renderer, SDL_Window *window, char *message)
 {
     SDL_Log("Erreure : %s, %s\n", message, SDL_GetError());
 
@@ -29,7 +29,7 @@ void errorHandeler(SDL_Renderer *renderer, SDL_Window *window, char *message)
 
 //------------------------------------------------
 
-pongElement* brickGenerator(pongElement *pBrick)
+pongElement* utility_brick_generator(pongElement *pBrick)
 {
     int width = 100;
     int height = 20;
@@ -55,18 +55,18 @@ pongElement* brickGenerator(pongElement *pBrick)
 
 //------------------------------------------------
 
-void brickplacement(game *game, SDL_Renderer *prenderer, SDL_Window *pwindow)
+void utility_brick_placement(game *game, SDL_Renderer *prenderer, SDL_Window *pwindow)
 {
     int count = 0;
     int posY = 50;
 
     for(int i = 0; i<(*game).brickNumber; i++)
     {
-        (*game).bricks[i] = brickGenerator((*game).bricks[i]);
+        (*game).bricks[i] = utility_brick_generator((*game).bricks[i]);
 
         if((*game).bricks[i] == NULL)
         {
-            errorHandeler(prenderer, pwindow, "ERROR when creating a brick");
+            utility_error_handeler(prenderer, pwindow, "ERROR when creating a brick");
         }
 
         if(count >= 7)
@@ -84,11 +84,26 @@ void brickplacement(game *game, SDL_Renderer *prenderer, SDL_Window *pwindow)
   
 }
 
+//------------------------------------------------
 
+void utility_clear_brick(pongElement *pBrick)
+{
+    free(pBrick);
+}
 
 //------------------------------------------------
 
-void clearBrick(pongElement *pBrick)
+SDL_bool utility_game_clock(game game, Uint64 *program_time)
 {
-    free(pBrick);
+    Uint64 frame_time = SDL_GetTicks64();
+
+    if((frame_time- *program_time) >= game.delta)
+    {
+        *program_time = frame_time;
+        return SDL_TRUE;
+    }
+
+    return SDL_FALSE;
+
+    
 }
