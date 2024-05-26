@@ -11,7 +11,7 @@
 //======================================================
 //main
 
-void sdlInit(char *choice)
+void pong_sdl_init(char *choice)
 {
     
     //---------------------------------------------------------------
@@ -19,7 +19,7 @@ void sdlInit(char *choice)
 
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
     {
-        errorHandeler(NULL, NULL, "SDL initialization ERROR");
+        utility_error_handeler(NULL, NULL, "SDL initialization ERROR");
     }
 
 
@@ -31,7 +31,7 @@ void sdlInit(char *choice)
     pwindow = SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WITH, WINDOW_HEIGHT, 0);
     if(pwindow == NULL)
     {
-        errorHandeler(NULL, pwindow, "ERROR creating SDL window");
+        utility_error_handeler(NULL, pwindow, "ERROR creating SDL window");
     }
 
     //---------------------
@@ -42,7 +42,7 @@ void sdlInit(char *choice)
     prenderer = SDL_CreateRenderer(pwindow, -1, SDL_RENDERER_ACCELERATED);
     if(prenderer == NULL)
     {
-         errorHandeler(prenderer, pwindow, "ERROR creating SDL render");
+         utility_error_handeler(prenderer, pwindow, "ERROR creating SDL render");
     }
 
     //---------------------
@@ -51,10 +51,10 @@ void sdlInit(char *choice)
     switch(choice[0])
     {
         case '1':
-            breakoutGame(prenderer, pwindow);
+            pong_breakout_game(prenderer, pwindow);
             break;
         case '2':
-            pongGame(prenderer, pwindow);
+            pong_pong_game(prenderer, pwindow);
             break;
         default:
             break;
@@ -74,9 +74,11 @@ void sdlInit(char *choice)
 
 //------------------------------------------------
 
-void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
+void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
 {
     SDL_bool program_launched = SDL_TRUE;
+    SDL_Event event;
+    Uint64 program_time = SDL_GetTicks64();
 
     //---------------------
     // game init
@@ -85,9 +87,9 @@ void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
     pongElement paddle;
     pongBall ball;
 
-    breakoutInit(&game, &paddle, &ball);
+    pong_breakout_init(&game, &paddle, &ball);
 
-    brickplacement(&game, prenderer, pwindow);
+    utility_brick_placement(&game, prenderer, pwindow);
 
     //---------------------
     // game Loop
@@ -95,56 +97,60 @@ void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
     
     while(program_launched)
     {
-        SDL_Event event;
-
-        //input
-        while(SDL_PollEvent(&event))
+        
+        if(utility_game_clock(game, &program_time))
         {
-            switch(event.type)
+
+            //input
+            while(SDL_PollEvent(&event))
             {
-                case SDL_KEYDOWN:
-                    controller(event, &paddle);
-                    continue;
-                case SDL_KEYUP:
-                    paddle.dirX = 0;
-                    continue;
-                case SDL_QUIT:
-                    program_launched = SDL_FALSE;
-                    break;
-                default:
-                    break;
+                switch(event.type)
+                {
+                    case SDL_KEYDOWN:
+                        pong_breakout_controller(event, &paddle);
+                        continue;
+                    case SDL_KEYUP:
+                        paddle.dirX = 0;
+                        continue;
+                    case SDL_QUIT:
+                        program_launched = SDL_FALSE;
+                        break;
+                    default:
+                        break;
+                }
+
             }
 
+
+            //control
+            control_paddle_out(game, &paddle);
+            control_ball_out(&ball, &game);
+            control_ball_on_paddle(&ball, game, paddle);
+            conotrol_ball_on_brick(&ball, &game);
+
+            //lose
+            if(ball.speed <= 0) program_launched = SDL_FALSE;
+
+            //update
+            paddle.rectangle.x += (paddle.dirX*paddle.speed);
+            ball.center.x += (ball.dirX*ball.speed);
+            ball.center.y += (ball.dirY*ball.speed);
+
+            //draw
+            draw_clean_render(prenderer, pwindow);
+            draw_ball(&ball, prenderer, pwindow);
+            draw_pong_element(&paddle, prenderer, pwindow);
+
+            for(int i=0; i<game.brickNumber; i++)
+            {
+                draw_pong_element(game.bricks[i], prenderer, pwindow);
+            }
+            
+
+            SDL_RenderPresent(prenderer);
+            
         }
 
-        //control
-        paddleOutControl(game, &paddle);
-        ballGameControl(&ball, game);
-        ballOnPaddleControl(&ball, paddle);
-        ballOnBricksControl(&ball, game);
-
-        //lose
-        if(ball.speed <= 0) program_launched = SDL_FALSE;
-
-        //update
-        paddle.rectangle.x += (paddle.dirX*paddle.speed);
-        ball.center.x += (ball.dirX*ball.speed);
-        ball.center.y += (ball.dirY*ball.speed);
-
-        SDL_Delay(game.clock);
-
-        //draw
-        cleanRender(prenderer, pwindow);
-        drawBall(&ball, prenderer, pwindow);
-        drawPongElement(&paddle, prenderer, pwindow);
-
-        for(int i=0; i<game.brickNumber; i++)
-        {
-            drawPongElement(game.bricks[i], prenderer, pwindow);
-        }
-        
-
-        SDL_RenderPresent(prenderer);
 
      }
 
@@ -153,7 +159,7 @@ void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
 
     for(int i=0; i<game.brickNumber; i++)
     {
-        clearBrick(game.bricks[i]);
+        utility_clear_brick(game.bricks[i]);
     }
 
     free(game.bricks);
@@ -163,15 +169,17 @@ void breakoutGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
 
 //------------------------------------------------
 
-void breakoutInit(game *game, pongElement *paddle, pongBall *ball)
+void pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
 {
     //game init
     (*game).width = WINDOW_WITH;
     (*game).height = WINDOW_HEIGHT;
-    (*game).clock = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
+    (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
     (*game).brickNumber = 42;
     (*game).brickGap = 12;
     (*game).bricks = NULL;
+    (*game).type = 0;
+    (*game).score[0] = 0; 
 
 
     (*game).bricks = calloc((*game).brickNumber, sizeof(pongElement*));
@@ -208,9 +216,11 @@ void breakoutInit(game *game, pongElement *paddle, pongBall *ball)
 
 //------------------------------------------------
 
-void pongGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
+void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
 {
     SDL_bool program_launched = SDL_TRUE;
+    SDL_Event event;
+    Uint64 program_time = SDL_GetTicks64();
 
     //---------------------
     // game init
@@ -220,7 +230,7 @@ void pongGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
     pongElement paddleP2;
     pongBall ball;
 
-    pongInit(&game, &paddleP1, &paddleP2, &ball);
+    pong_pong_init(&game, &paddleP1, &paddleP2, &ball);
 
 
     //---------------------
@@ -229,53 +239,56 @@ void pongGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
     
     while(program_launched)
     {
-        SDL_Event event;
-
-        //input
-        while(SDL_PollEvent(&event))
+    
+        if(utility_game_clock(game, &program_time))
         {
-            switch(event.type)
+
+            //input
+            while(SDL_PollEvent(&event))
             {
-                case SDL_KEYDOWN:
-                    pongController(event, &paddleP1, &paddleP2);
-                    continue;
-                case SDL_KEYUP:
-                    paddleP1.dirY = 0;
-                    paddleP2.dirY = 0;
-                    continue;
-                case SDL_QUIT:
-                    program_launched = SDL_FALSE;
-                    break;
-                default:
-                    break;
+                switch(event.type)
+                {
+                    case SDL_KEYDOWN:
+                        pong_pong_controller(event, &paddleP1, &paddleP2);
+                        continue;
+                    case SDL_KEYUP:
+                        paddleP1.dirY = 0;
+                        paddleP2.dirY = 0;
+                        continue;
+                    case SDL_QUIT:
+                        program_launched = SDL_FALSE;
+                        break;
+                    default:
+                        break;
+                }
+
             }
 
+            //control
+            control_paddle_out(game, &paddleP1);
+            control_paddle_out(game, &paddleP2);
+            control_ball_out(&ball, &game);
+            control_ball_on_paddle(&ball, game, paddleP1);
+            control_ball_on_paddle(&ball, game, paddleP2);
+
+
+            //update
+            paddleP1.rectangle.y += (paddleP1.dirY*paddleP1.speed);
+            paddleP2.rectangle.y += (paddleP2.dirY*paddleP2.speed);
+            ball.center.x += (ball.dirX*ball.speed);
+            ball.center.y += (ball.dirY*ball.speed);
+
+            SDL_Delay(game.delta);
+
+            //draw
+            draw_clean_render(prenderer, pwindow);
+            draw_ball(&ball, prenderer, pwindow);
+            draw_pong_element(&paddleP1, prenderer, pwindow);
+            draw_pong_element(&paddleP2, prenderer, pwindow);
+            
+
+            SDL_RenderPresent(prenderer);
         }
-
-        //control
-        paddleOutControl(game, &paddleP1);
-        paddleOutControl(game, &paddleP2);
-        ballGameControl(&ball, game);
-        ballOnPaddleControl(&ball, paddleP1);
-        ballOnPaddleControl(&ball, paddleP2);
-
-
-        //update
-        paddleP1.rectangle.y += (paddleP1.dirY*paddleP1.speed);
-        paddleP2.rectangle.y += (paddleP2.dirY*paddleP2.speed);
-        ball.center.x += (ball.dirX*ball.speed);
-        ball.center.y += (ball.dirY*ball.speed);
-
-        SDL_Delay(game.clock);
-
-        //draw
-        cleanRender(prenderer, pwindow);
-        drawBall(&ball, prenderer, pwindow);
-        drawPongElement(&paddleP1, prenderer, pwindow);
-        drawPongElement(&paddleP2, prenderer, pwindow);
-        
-
-        SDL_RenderPresent(prenderer);
 
      }
 
@@ -288,13 +301,16 @@ void pongGame(SDL_Renderer *prenderer, SDL_Window *pwindow)
 
 //------------------------------------------------
 
-void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
+void pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
 {
     //game init
     (*game).width = WINDOW_WITH;
     (*game).height = WINDOW_HEIGHT;
-    (*game).clock = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
+    (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
     (*game).brickNumber = 0;
+    (*game).type = 1;
+    (*game).score[0] = 0;
+    (*game).score[1] = 0;
 
 
     //paddle init
@@ -323,7 +339,7 @@ void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall
     //ball init
     (*ball).center.x = 400;
     (*ball).center.y = 300;
-    (*ball).radius = 5;
+    (*ball).radius = 8;
     (*ball).resolution = 1;  //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
     (*ball).colorRGB[0] = 0;
     (*ball).colorRGB[1] = 250;
@@ -336,7 +352,7 @@ void pongInit(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall
 
 //------------------------------------------------
 
-void controller(SDL_Event event, pongElement *paddle)
+void pong_breakout_controller(SDL_Event event, pongElement *paddle)
 {
     switch(event.key.keysym.sym)
     {
@@ -354,7 +370,7 @@ void controller(SDL_Event event, pongElement *paddle)
 
 //------------------------------------------------
 
-void pongController(SDL_Event event, pongElement *paddleP1, pongElement *paddleP2)
+void pong_pong_controller(SDL_Event event, pongElement *paddleP1, pongElement *paddleP2)
 {
     switch(event.key.keysym.sym)
     {

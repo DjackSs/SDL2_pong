@@ -6,8 +6,8 @@
 
 
 //draw function
-void cleanRender(SDL_Renderer *prenderer, SDL_Window *pwindow);
-void drawBall(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow);
-void drawPongElement(pongElement *element, SDL_Renderer *prenderer, SDL_Window *pwindow);
+void draw_clean_render(SDL_Renderer *prenderer, SDL_Window *pwindow);
+void draw_ball(pongBall *ball, SDL_Renderer *prenderer, SDL_Window *pwindow);
+void draw_pong_element(pongElement *element, SDL_Renderer *prenderer, SDL_Window *pwindow);
 
 #endif
