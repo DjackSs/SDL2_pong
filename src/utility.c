@@ -8,7 +8,7 @@
 //utility
 
 
-void utility_error_handeler(SDL_Renderer *renderer, SDL_Window *window, char *message)
+void utility_error_handler(SDL_Renderer *renderer, SDL_Window *window, char *message)
 {
     SDL_Log("Erreure : %s, %s\n", message, SDL_GetError());
 
@@ -66,7 +66,7 @@ void utility_brick_placement(game *game, SDL_Renderer *prenderer, SDL_Window *pw
 
         if((*game).bricks[i] == NULL)
         {
-            utility_error_handeler(prenderer, pwindow, "ERROR when creating a brick");
+            utility_error_handler(prenderer, pwindow, "ERROR when creating a brick");
         }
 
         if(count >= 7)

@@ -14,7 +14,8 @@ typedef struct game
     int brickNumber;
     int brickGap;
     char type; // 0 = breakout, 1 = pong
-    int score[2];
+    char playerNumber;
+    int *score;
     struct pongElement **bricks;
 
 } game;
@@ -51,10 +52,10 @@ typedef struct pongBall
 //main function
 void pong_sdl_init(char *choice);
 
-void pong_breakout_init(game *game, pongElement *paddle, pongBall *ball);
+SDL_bool pong_breakout_init(game *game, pongElement *paddle, pongBall *ball);
 void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
 
-void pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball);
+SDL_bool pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball);
 void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
 
 

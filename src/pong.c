@@ -19,7 +19,7 @@ void pong_sdl_init(char *choice)
 
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
     {
-        utility_error_handeler(NULL, NULL, "SDL initialization ERROR");
+        utility_error_handler(NULL, NULL, "SDL initialization ERROR");
     }
 
 
@@ -31,7 +31,7 @@ void pong_sdl_init(char *choice)
     pwindow = SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WITH, WINDOW_HEIGHT, 0);
     if(pwindow == NULL)
     {
-        utility_error_handeler(NULL, pwindow, "ERROR creating SDL window");
+        utility_error_handler(NULL, pwindow, "ERROR creating SDL window");
     }
 
     //---------------------
@@ -42,7 +42,7 @@ void pong_sdl_init(char *choice)
     prenderer = SDL_CreateRenderer(pwindow, -1, SDL_RENDERER_ACCELERATED);
     if(prenderer == NULL)
     {
-         utility_error_handeler(prenderer, pwindow, "ERROR creating SDL render");
+         utility_error_handler(prenderer, pwindow, "ERROR creating SDL render");
     }
 
     //---------------------
@@ -87,7 +87,10 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     pongElement paddle;
     pongBall ball;
 
-    pong_breakout_init(&game, &paddle, &ball);
+    if(!pong_breakout_init(&game, &paddle, &ball))
+    {
+        utility_error_handler(prenderer, pwindow, "ERROR initializing game");
+    }
 
     utility_brick_placement(&game, prenderer, pwindow);
 
@@ -163,13 +166,14 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     }
 
     free(game.bricks);
+    free(game.score);
 
     
 }
 
 //------------------------------------------------
 
-void pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
+SDL_bool pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
 {
     //game init
     (*game).width = WINDOW_WITH;
@@ -179,13 +183,20 @@ void pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
     (*game).brickGap = 12;
     (*game).bricks = NULL;
     (*game).type = 0;
-    (*game).score[0] = 0; 
+    (*game).playerNumber = 1;
+    (*game).score = NULL; 
 
 
     (*game).bricks = calloc((*game).brickNumber, sizeof(pongElement*));
     if((*game).bricks == NULL)
     {
-        exit(-1);
+        return SDL_FALSE;
+    }
+
+    (*game).score = calloc((*game).playerNumber, sizeof(int));
+    if((*game).score == NULL)
+    {
+        return SDL_FALSE;
     }
 
     //paddle init
@@ -212,6 +223,9 @@ void pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
     (*ball).dirY = 1;
     (*ball).speed = 1;
 
+
+    return SDL_TRUE;
+
 }
 
 //------------------------------------------------
@@ -230,7 +244,10 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     pongElement paddleP2;
     pongBall ball;
 
-    pong_pong_init(&game, &paddleP1, &paddleP2, &ball);
+    if(!pong_pong_init(&game, &paddleP1, &paddleP2, &ball))
+    {
+        utility_error_handler(prenderer, pwindow, "ERROR initializing game");
+    }
 
 
     //---------------------
@@ -271,14 +288,11 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
             control_ball_on_paddle(&ball, game, paddleP1);
             control_ball_on_paddle(&ball, game, paddleP2);
 
-
             //update
             paddleP1.rectangle.y += (paddleP1.dirY*paddleP1.speed);
             paddleP2.rectangle.y += (paddleP2.dirY*paddleP2.speed);
             ball.center.x += (ball.dirX*ball.speed);
             ball.center.y += (ball.dirY*ball.speed);
-
-            SDL_Delay(game.delta);
 
             //draw
             draw_clean_render(prenderer, pwindow);
@@ -295,13 +309,14 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     //---------------------
     //game close
 
+    free(game.score);
 
     
 }
 
 //------------------------------------------------
 
-void pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
+SDL_bool pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
 {
     //game init
     (*game).width = WINDOW_WITH;
@@ -309,8 +324,14 @@ void pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, po
     (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
     (*game).brickNumber = 0;
     (*game).type = 1;
-    (*game).score[0] = 0;
-    (*game).score[1] = 0;
+    (*game).playerNumber = 2;
+    (*game).score = NULL;
+
+    (*game).score = calloc((*game).playerNumber, sizeof(int));
+    if((*game).score == NULL)
+    {
+        return SDL_FALSE;
+    }
 
 
     //paddle init
@@ -347,6 +368,8 @@ void pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, po
     (*ball).dirX = 1;
     (*ball).dirY = 0;
     (*ball).speed = 1;
+
+    return SDL_TRUE;
 
 }
 
