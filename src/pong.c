@@ -28,7 +28,7 @@ void pong_sdl_init(char *choice)
 
     SDL_Window *pwindow = NULL;
 
-    pwindow = SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WITH, WINDOW_HEIGHT, 0);
+    pwindow = SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DEFAULT_WINDOW_WITH, DEFAULT_WINDOW_HEIGHT, 0);
     if(pwindow == NULL)
     {
         utility_error_handler(NULL, pwindow, "ERROR creating SDL window");
@@ -92,7 +92,12 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
         utility_error_handler(prenderer, pwindow, "ERROR initializing game");
     }
 
-    utility_brick_placement(&game, prenderer, pwindow);
+    if(!utility_bricks_init(&game))
+    {
+        utility_error_handler(prenderer, pwindow, "ERROR initializing bricks");
+    }
+
+    utility_bricks_placement(&game, prenderer, pwindow);
 
     //---------------------
     // game Loop
@@ -162,7 +167,7 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
 
     for(int i=0; i<game.brickNumber; i++)
     {
-        utility_clear_brick(game.bricks[i]);
+       free(game.bricks[i]);
     }
 
     free(game.bricks);
@@ -176,22 +181,17 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
 SDL_bool pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
 {
     //game init
-    (*game).width = WINDOW_WITH;
-    (*game).height = WINDOW_HEIGHT;
+    (*game).width = DEFAULT_WINDOW_WITH;
+    (*game).height = DEFAULT_WINDOW_HEIGHT;
+    (*game).padding = GAME_PADDING;
     (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
-    (*game).brickNumber = 42;
-    (*game).brickGap = 12;
+    (*game).brickNumber = 0;
+    (*game).brickGapX = 0;
+    (*game).brickGapY = BRICK_GAP_Y;
     (*game).bricks = NULL;
     (*game).type = 0;
     (*game).playerNumber = 1;
     (*game).score = NULL; 
-
-
-    (*game).bricks = calloc((*game).brickNumber, sizeof(pongElement*));
-    if((*game).bricks == NULL)
-    {
-        return SDL_FALSE;
-    }
 
     (*game).score = calloc((*game).playerNumber, sizeof(int));
     if((*game).score == NULL)
@@ -200,9 +200,9 @@ SDL_bool pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
     }
 
     //paddle init
-    (*paddle).colorRGB[0] = 50;
-    (*paddle).colorRGB[1] = 0;
-    (*paddle).colorRGB[2] = 115;
+    (*paddle).colorRGB[0] = PADDLE_RGB_R;
+    (*paddle).colorRGB[1] = PADDLE_RGB_G;
+    (*paddle).colorRGB[2] = PADDLE_RGB_B;
     (*paddle).dirX = 0;
     (*paddle).dirY = 0;
     (*paddle).speed = 5;
@@ -216,9 +216,9 @@ SDL_bool pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
     (*ball).center.y = 400;
     (*ball).radius = 8;
     (*ball).resolution = 1; //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
-    (*ball).colorRGB[0] = 0;
-    (*ball).colorRGB[1] = 250;
-    (*ball).colorRGB[2] = 250;
+    (*ball).colorRGB[0] = BALL_RGB_R;
+    (*ball).colorRGB[1] = BALL_RGB_G;
+    (*ball).colorRGB[2] = BALL_RGB_B;
     (*ball).dirX = 0;
     (*ball).dirY = 1;
     (*ball).speed = 1;
@@ -319,8 +319,8 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
 SDL_bool pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
 {
     //game init
-    (*game).width = WINDOW_WITH;
-    (*game).height = WINDOW_HEIGHT;
+    (*game).width = DEFAULT_WINDOW_WITH;
+    (*game).height = DEFAULT_WINDOW_HEIGHT;
     (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
     (*game).brickNumber = 0;
     (*game).type = 1;
@@ -335,9 +335,9 @@ SDL_bool pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2
 
 
     //paddle init
-    (*paddleP1).colorRGB[0] = 50;
-    (*paddleP1).colorRGB[1] = 0;
-    (*paddleP1).colorRGB[2] = 115;
+    (*paddleP1).colorRGB[0] = PADDLE_RGB_R;
+    (*paddleP1).colorRGB[1] = PADDLE_RGB_G;
+    (*paddleP1).colorRGB[2] = PADDLE_RGB_B;
     (*paddleP1).dirX = 0;
     (*paddleP1).dirY = 0;
     (*paddleP1).speed = 5;
@@ -346,9 +346,9 @@ SDL_bool pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2
     (*paddleP1).rectangle.w = 20;
     (*paddleP1).rectangle.h = 100;
 
-    (*paddleP2).colorRGB[0] = 50;
-    (*paddleP2).colorRGB[1] = 0;
-    (*paddleP2).colorRGB[2] = 115;
+    (*paddleP2).colorRGB[0] = PADDLE_RGB_R;
+    (*paddleP2).colorRGB[1] = PADDLE_RGB_G;
+    (*paddleP2).colorRGB[2] = PADDLE_RGB_B;
     (*paddleP2).dirX = 0;
     (*paddleP2).dirY = 0;
     (*paddleP2).speed = 5;
@@ -362,9 +362,9 @@ SDL_bool pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2
     (*ball).center.y = 300;
     (*ball).radius = 8;
     (*ball).resolution = 1;  //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
-    (*ball).colorRGB[0] = 0;
-    (*ball).colorRGB[1] = 250;
-    (*ball).colorRGB[2] = 250;
+    (*ball).colorRGB[0] = BALL_RGB_R;
+    (*ball).colorRGB[1] = BALL_RGB_G;
+    (*ball).colorRGB[2] = BALL_RGB_B;
     (*ball).dirX = 1;
     (*ball).dirY = 0;
     (*ball).speed = 1;
