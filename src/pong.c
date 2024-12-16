@@ -22,7 +22,6 @@ void pong_sdl_init(char *choice)
         utility_error_handler(NULL, NULL, "SDL initialization ERROR");
     }
 
-
     //---------------------
     //window
 
@@ -60,15 +59,12 @@ void pong_sdl_init(char *choice)
             break;
     }
     
-
-
     //---------------------
     //close SDL
 
     SDL_DestroyRenderer(prenderer);
     SDL_DestroyWindow(pwindow);
     SDL_Quit();
-
 
 }
 
@@ -106,11 +102,9 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
 
     
     while(program_launched)
-    {
-        
+    {     
         if(utility_game_clock(game, &program_time))
         {
-
             //input
             while(SDL_PollEvent(&event))
             {
@@ -130,7 +124,6 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
                 }
 
             }
-
 
             //control
             control_paddle_out(game, &paddle);
@@ -156,12 +149,8 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
                 draw_pong_element(game.bricks[i], prenderer, pwindow);
             }
             
-
-            SDL_RenderPresent(prenderer);
-            
+            SDL_RenderPresent(prenderer);      
         }
-
-
      }
 
     //---------------------
@@ -169,7 +158,6 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
 
     utility_free_game(&game);
 
-    
 }
 
 
@@ -196,14 +184,12 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
         utility_error_handler(prenderer, pwindow, "ERROR initializing game");
     }
 
-
     //---------------------
     // game Loop
 
     
     while(program_launched)
-    {
-    
+    { 
         if(utility_game_clock(game, &program_time))
         {
 
@@ -225,7 +211,6 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
                     default:
                         break;
                 }
-
             }
 
             //control
@@ -247,7 +232,6 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
             draw_pong_element(&paddleP1, prenderer, pwindow);
             draw_pong_element(&paddleP2, prenderer, pwindow);
             
-
             SDL_RenderPresent(prenderer);
         }
 
@@ -257,7 +241,6 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     //game close
 
     utility_free_game(&game);
-
 }
 
 //------------------------------------------------
@@ -311,12 +294,10 @@ SDL_bool pong_game_init(game *game, pongElement *paddleP1, pongElement *paddleP2
         (*ball).speed = 1;
 
         initState = SDL_TRUE;
-
     }
 
     if((*game).type == PONG)
     {
-
         //game init
         (*game).width = DEFAULT_WINDOW_WITH;
         (*game).height = DEFAULT_WINDOW_HEIGHT;
@@ -330,7 +311,6 @@ SDL_bool pong_game_init(game *game, pongElement *paddleP1, pongElement *paddleP2
         {
             return SDL_FALSE;
         }
-
 
         //paddle init
         (*paddleP1).colorRGB[0] = PADDLE_RGB_R;
@@ -368,7 +348,6 @@ SDL_bool pong_game_init(game *game, pongElement *paddleP1, pongElement *paddleP2
         (*ball).speed = 1;
 
         initState = SDL_TRUE;
-
     }
    
     return initState;
@@ -389,7 +368,6 @@ void pong_breakout_controller(SDL_Event event, pongElement *paddle)
         default:
             break;
     }
-
 }
 
 //------------------------------------------------
@@ -413,7 +391,6 @@ void pong_pong_controller(SDL_Event event, pongElement *paddleP1, pongElement *p
         default:
             break;
     }
-
 }
 
 
