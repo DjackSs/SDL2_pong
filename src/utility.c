@@ -122,3 +122,16 @@ SDL_bool utility_game_clock(game game, Uint64 *program_time)
 
     
 }
+
+//------------------------------------------------
+
+void utility_free_game(game *game)
+{
+    for(int i=0; i<(*game).brickNumber; i++)
+    {
+       free((*game).bricks[i]);
+    }
+
+    free((*game).bricks);
+    free((*game).score);
+}
