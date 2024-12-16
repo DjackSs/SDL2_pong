@@ -55,6 +55,9 @@ void pong_sdl_init(char *choice)
         case '2':
             pong_pong_game(prenderer, pwindow);
             break;
+        case '3':
+            pong_editor_game(prenderer, pwindow);
+            break;
         default:
             break;
     }
@@ -245,6 +248,87 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
 
 //------------------------------------------------
 
+void pong_editor_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
+{
+    SDL_bool program_launched = SDL_TRUE;
+    SDL_Event event;
+    Uint64 program_time = SDL_GetTicks64();
+
+    //---------------------
+    // game init
+
+    game game;
+    pongElement paddle;
+    SDL_bool saveBrickPosition = SDL_FALSE;
+    SDL_bool brickCollision = SDL_FALSE;
+
+    game.type = EDITOR;
+
+    if(!pong_game_init(&game, &paddle, NULL, NULL))
+    {
+        utility_error_handler(prenderer, pwindow, "ERROR initializing game");
+    }
+
+    //---------------------
+    // game Loop
+
+    while(program_launched)
+    {     
+        if(utility_game_clock(game, &program_time))
+        {
+            //input
+            while(SDL_PollEvent(&event))
+            {
+                switch(event.type)
+                {
+                    case SDL_KEYDOWN:
+                        saveBrickPosition = pong_editor_controller(event, &paddle);
+                        continue;
+                    case SDL_KEYUP:
+                        paddle.dirX = 0;
+                        paddle.dirY = 0;
+                        continue;
+                    case SDL_QUIT:
+                        program_launched = SDL_FALSE;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            //control
+            control_paddle_out(game, &paddle);
+            if(saveBrickPosition) brickCollision = control_brick_on_brick(game, paddle);
+           
+           
+            //update
+            if(saveBrickPosition && !brickCollision) game = utility_bricks_saveBrick(game, paddle);
+            paddle.rectangle.x += (paddle.dirX*paddle.speed);
+            paddle.rectangle.y += (paddle.dirY*paddle.speed);
+
+
+            //draw
+            draw_clean_render(prenderer, pwindow);
+
+            for(int i=0; i<game.brickNumber; i++)
+            {
+                draw_pong_element(game.bricks[i], prenderer, pwindow);
+            }
+
+            draw_pong_element(&paddle, prenderer, pwindow);
+            
+            SDL_RenderPresent(prenderer);      
+        }
+     }
+
+    //---------------------
+    //game close
+
+    utility_free_game(&game);
+}
+
+//------------------------------------------------
+
 SDL_bool pong_game_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
 {
     SDL_bool initState = SDL_FALSE;
@@ -349,6 +433,35 @@ SDL_bool pong_game_init(game *game, pongElement *paddleP1, pongElement *paddleP2
 
         initState = SDL_TRUE;
     }
+
+     if((*game).type == EDITOR)
+     {
+         //game init
+        (*game).width = DEFAULT_WINDOW_WITH;
+        (*game).height = DEFAULT_WINDOW_HEIGHT;
+        (*game).padding = GAME_PADDING;
+        (*game).delta = 5;
+        (*game).brickNumber = 0;
+        (*game).brickGapX = 0;
+        (*game).brickGapY = 20;
+        (*game).bricks = NULL;
+        (*game).playerNumber = 1;
+        (*game).score = NULL;
+
+        //paddle init
+        (*paddleP1).colorRGB[0] = PADDLE_RGB_R;
+        (*paddleP1).colorRGB[1] = PADDLE_RGB_G;
+        (*paddleP1).colorRGB[2] = PADDLE_RGB_B;
+        (*paddleP1).dirX = 0;
+        (*paddleP1).dirY = 0;
+        (*paddleP1).speed = 1;
+        (*paddleP1).rectangle.x = 350;
+        (*paddleP1).rectangle.y = 570;
+        (*paddleP1).rectangle.w = 100;
+        (*paddleP1).rectangle.h = 20; 
+
+        initState = SDL_TRUE;
+     }
    
     return initState;
 }
@@ -391,6 +504,36 @@ void pong_pong_controller(SDL_Event event, pongElement *paddleP1, pongElement *p
         default:
             break;
     }
+}
+
+//------------------------------------------------
+
+SDL_bool pong_editor_controller(SDL_Event event, pongElement *paddle)
+{
+    SDL_bool savePosition = SDL_FALSE;
+
+    switch(event.key.keysym.sym)
+    {
+        case SDLK_UP:
+            (*paddle).dirY = -1;
+            break;
+        case SDLK_DOWN:
+            (*paddle).dirY = 1;
+            break;
+       case SDLK_LEFT:
+            (*paddle).dirX = -1;
+            break;
+        case SDLK_RIGHT:
+            (*paddle).dirX = 1;
+            break;
+        case SDLK_RETURN:
+            savePosition = SDL_TRUE;
+            break;
+        default:
+            break;
+    }
+
+    return savePosition;
 }
 
 

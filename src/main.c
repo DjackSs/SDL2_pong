@@ -22,7 +22,7 @@ int main (int argc , char * *argv)
 
     char choice[3] = {0};
 
-    while(choice[0] != '3')
+    while(choice[0] != '4')
     {
         printf("====================\n");
         printf("\t HELLO\n");
@@ -30,12 +30,13 @@ int main (int argc , char * *argv)
         printf("Choose your game: \n");
         printf("1 - Breakout\n");
         printf("2 - Pong\n");
-        printf("3 - Exit\n");
+        printf("3 - Editor\n");
+        printf("4 - Exit\n");
 
-       fgets(choice, 3, stdin);
+       fgets(choice, 4, stdin);
        stdin_purge(choice);
 
-        if(choice[0] == '1' || choice[0] == '2')
+        if(choice[0] == '1' || choice[0] == '2' || choice[0] == '3')
         {
             pong_sdl_init(choice);
         }

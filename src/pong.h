@@ -12,7 +12,7 @@
 //game board
 #define GAME_PADDING 10
 
-enum gameType {BREAKOUT, PONG};
+enum gameType {BREAKOUT, PONG, EDITOR};
 
 typedef struct game
 {
@@ -80,9 +80,11 @@ SDL_bool pong_game_init(game *game, pongElement *paddleP1, pongElement *paddleP2
 
 void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
 void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
+void pong_editor_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
 
 //controller function
 void pong_breakout_controller(SDL_Event event, pongElement *element);
+SDL_bool pong_editor_controller(SDL_Event event, pongElement *paddle);
 void pong_pong_controller(SDL_Event event, pongElement *paddleP1, pongElement *paddleP2);
 
 

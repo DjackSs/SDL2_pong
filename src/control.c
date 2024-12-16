@@ -8,13 +8,14 @@
 
 void control_paddle_out(game game, pongElement *paddle)
 {
+    
     //horizontal controls
     if((*paddle).rectangle.x - (*paddle).speed <= 0 && (*paddle).dirX == -1)
     {
         (*paddle).dirX = 0;   
     }
 
-    if((*paddle).rectangle.x + (*paddle).rectangle.w + (*paddle).speed >= 800 && (*paddle).dirX == 1)
+    if((*paddle).rectangle.x + (*paddle).rectangle.w + (*paddle).speed >= game.width && (*paddle).dirX == 1)
     {
         (*paddle).dirX = 0;
     }
@@ -25,7 +26,7 @@ void control_paddle_out(game game, pongElement *paddle)
         (*paddle).dirY = 0;   
     }
 
-    if((*paddle).rectangle.y + (*paddle).rectangle.h + (*paddle).speed >= 600 && (*paddle).dirY == 1)
+    if((*paddle).rectangle.y + (*paddle).rectangle.h + (*paddle).speed >= game.height && (*paddle).dirY == 1)
     {
         (*paddle).dirY = 0;
     }
@@ -106,7 +107,6 @@ void control_ball_on_paddle(pongBall *ball, game game, pongElement paddle)
         }
    }
 
-
 }
 
 //------------------------------------------------
@@ -134,3 +134,35 @@ void conotrol_ball_on_brick(pongBall *ball, game *game)
     }
 
 }
+
+//------------------------------------------------
+
+SDL_bool control_brick_on_brick(game game, pongElement brick)
+{
+    SDL_bool collision = SDL_FALSE;
+
+     for( int i=0; i< game.brickNumber; i++)
+    {
+        
+        if((brick.rectangle.x >= (*game.bricks[i]).rectangle.x) && (brick.rectangle.x <= ((*game.bricks[i]).rectangle.x + (*game.bricks[i]).rectangle.w)))
+        {
+            if(((brick.rectangle.y + brick.rectangle.h) >= (*game.bricks[i]).rectangle.y) && (brick.rectangle.y <= ((*game.bricks[i]).rectangle.y + (*game.bricks[i]).rectangle.h)))
+            {
+                collision = SDL_TRUE; 
+            }            
+        }
+
+          
+        if(((brick.rectangle.x + brick.rectangle.w) >= (*game.bricks[i]).rectangle.x) && ((brick.rectangle.x + brick.rectangle.w) <= ((*game.bricks[i]).rectangle.x + (*game.bricks[i]).rectangle.w)))
+        {      
+            if(((brick.rectangle.y) <= ((*game.bricks[i]).rectangle.y + (*game.bricks[i]).rectangle.h)) && ((brick.rectangle.y + brick.rectangle.h) >= ((*game.bricks[i]).rectangle.y)))
+            {
+                collision = SDL_TRUE; 
+            }                   
+       
+        }
+    }   
+
+    return collision;
+}
+

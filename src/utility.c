@@ -103,7 +103,23 @@ void utility_bricks_placement(game *game, SDL_Renderer *prenderer, SDL_Window *p
         count++;
 
     }
-  
+}
+
+//------------------------------------------------
+
+game utility_bricks_saveBrick(game game, pongElement paddle)
+{
+    game.brickNumber++;
+
+    game.bricks = realloc(game.bricks, game.brickNumber*(sizeof(pongElement*)));
+    if(game.bricks == NULL) exit(-1);
+
+    game.bricks[game.brickNumber-1] = utility_brick_generator(game.bricks[game.brickNumber-1]);
+
+    (*game.bricks[game.brickNumber-1]).rectangle.x = paddle.rectangle.x;
+    (*game.bricks[game.brickNumber-1]).rectangle.y = paddle.rectangle.y;
+
+    return game;
 }
 
 //------------------------------------------------
