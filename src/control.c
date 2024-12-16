@@ -40,7 +40,7 @@ void control_ball_out(pongBall *ball, game *game)
     if(((*ball).center.y + (*ball).radius) >= (*game).height)
     {
         //lose in breakout game
-        if((*game).type == 0)
+        if((*game).type == BREAKOUT)
         {
             (*ball).speed = 0;
             
@@ -49,7 +49,6 @@ void control_ball_out(pongBall *ball, game *game)
         {
             (*ball).dirY *= -1;   
         }  
-        
     }
 
     if(((*ball).center.y - (*ball).radius) <= 0)
@@ -65,8 +64,7 @@ void control_ball_out(pongBall *ball, game *game)
         {
             (*game).score[1]++;
             printf("scrore p2 : %d\n", (*game).score[1]);
-        }
-        
+        } 
     }
 
     if(((*ball).center.x + (*ball).radius) >= (*game).width)
@@ -79,7 +77,6 @@ void control_ball_out(pongBall *ball, game *game)
             printf("scrore p1 : %d\n", (*game).score[0]);
         }
     }
-
 }
 
 //------------------------------------------------
@@ -91,7 +88,8 @@ void control_ball_on_paddle(pongBall *ball, game game, pongElement paddle)
    {
         if((*ball).center.x >= paddle.rectangle.x && ( ((*ball).center.x - (*ball).radius) <= (paddle.rectangle.x + paddle.rectangle.w) ))
         {
-            if(game.type == 0)
+            //gameType decide x or y direction
+            if(game.type == BREAKOUT)
             {
                 (*ball).dirY *= -1;
 
@@ -105,7 +103,6 @@ void control_ball_on_paddle(pongBall *ball, game game, pongElement paddle)
                 (*ball).dirY = paddle.dirY;
 
             }
-            
         }
    }
 
@@ -120,8 +117,8 @@ void conotrol_ball_on_brick(pongBall *ball, game *game)
     {
         if(((*ball).center.y + (*ball).radius) >= (*(*game).bricks[i]).rectangle.y && ((*ball).center.y - + (*ball).radius) <=  (*(*game).bricks[i]).rectangle.y +(*(*game).bricks[i]).rectangle.h)
         {
-             if((*ball).center.x >= (*(*game).bricks[i]).rectangle.x && ( ((*ball).center.x - (*ball).radius) <= ((*(*game).bricks[i]).rectangle.x + (*(*game).bricks[i]).rectangle.w) ))
-             {
+            if((*ball).center.x >= (*(*game).bricks[i]).rectangle.x && ( ((*ball).center.x - (*ball).radius) <= ((*(*game).bricks[i]).rectangle.x + (*(*game).bricks[i]).rectangle.w) ))
+            {
                 (*ball).dirY *= -1;
 
                 (*(*game).bricks[i]).rectangle.x = 0;
@@ -132,8 +129,7 @@ void conotrol_ball_on_brick(pongBall *ball, game *game)
                 (*game).score[0]++;
 
                 printf("scrore : %d\n", (*game).score[0]);
-             }
-
+            }
         }
     }
 

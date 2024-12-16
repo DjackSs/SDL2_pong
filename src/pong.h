@@ -12,7 +12,7 @@
 
 #define BRICK_WIDTH 100
 #define BRICK_HEIGHT 20
-#define BRICK_GAP_Y 50
+#define BRICK_GAP_Y 40
 #define BRICK_RGB_R 215
 #define BRICK_RGB_G 24
 #define BRICK_RGB_B 202
@@ -26,6 +26,8 @@
 #define BALL_RGB_B 250
 
 //game board
+enum gameType {BREAKOUT, PONG};
+
 typedef struct game
 {
     int width;
@@ -35,7 +37,7 @@ typedef struct game
     int brickNumber;
     int brickGapX;
     int brickGapY;
-    char type; // 0 = breakout, 1 = pong
+    enum gameType type;
     char playerNumber;
     int *score;
     struct pongElement **bricks;
@@ -68,15 +70,13 @@ typedef struct pongBall
 
 //------------------------------------------------
 
-//main function
+//game function
 void pong_sdl_init(char *choice);
 
-SDL_bool pong_breakout_init(game *game, pongElement *paddle, pongBall *ball);
+SDL_bool pong_game_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball);
+
 void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
-
-SDL_bool pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball);
 void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow);
-
 
 //controller function
 void pong_breakout_controller(SDL_Event event, pongElement *element);

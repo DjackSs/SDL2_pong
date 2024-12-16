@@ -9,7 +9,7 @@
 
 
 //======================================================
-//main
+//game
 
 void pong_sdl_init(char *choice)
 {
@@ -87,7 +87,9 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     pongElement paddle;
     pongBall ball;
 
-    if(!pong_breakout_init(&game, &paddle, &ball))
+    game.type = BREAKOUT;
+
+    if(!pong_game_init(&game, &paddle, NULL, &ball))
     {
         utility_error_handler(prenderer, pwindow, "ERROR initializing game");
     }
@@ -165,68 +167,11 @@ void pong_breakout_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     //---------------------
     //game close
 
-    for(int i=0; i<game.brickNumber; i++)
-    {
-       free(game.bricks[i]);
-    }
-
-    free(game.bricks);
-    free(game.score);
+    utility_free_game(&game);
 
     
 }
 
-//------------------------------------------------
-
-SDL_bool pong_breakout_init(game *game, pongElement *paddle, pongBall *ball)
-{
-    //game init
-    (*game).width = DEFAULT_WINDOW_WITH;
-    (*game).height = DEFAULT_WINDOW_HEIGHT;
-    (*game).padding = GAME_PADDING;
-    (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
-    (*game).brickNumber = 0;
-    (*game).brickGapX = 0;
-    (*game).brickGapY = BRICK_GAP_Y;
-    (*game).bricks = NULL;
-    (*game).type = 0;
-    (*game).playerNumber = 1;
-    (*game).score = NULL; 
-
-    (*game).score = calloc((*game).playerNumber, sizeof(int));
-    if((*game).score == NULL)
-    {
-        return SDL_FALSE;
-    }
-
-    //paddle init
-    (*paddle).colorRGB[0] = PADDLE_RGB_R;
-    (*paddle).colorRGB[1] = PADDLE_RGB_G;
-    (*paddle).colorRGB[2] = PADDLE_RGB_B;
-    (*paddle).dirX = 0;
-    (*paddle).dirY = 0;
-    (*paddle).speed = 5;
-    (*paddle).rectangle.x = 350;
-    (*paddle).rectangle.y = 570;
-    (*paddle).rectangle.w = 100;
-    (*paddle).rectangle.h = 20;
-
-    //ball init
-    (*ball).center.x = 400;
-    (*ball).center.y = 400;
-    (*ball).radius = 8;
-    (*ball).resolution = 1; //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
-    (*ball).colorRGB[0] = BALL_RGB_R;
-    (*ball).colorRGB[1] = BALL_RGB_G;
-    (*ball).colorRGB[2] = BALL_RGB_B;
-    (*ball).dirX = 0;
-    (*ball).dirY = 1;
-    (*ball).speed = 1;
-
-
-    return SDL_TRUE;
-
-}
 
 //------------------------------------------------
 
@@ -244,7 +189,9 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     pongElement paddleP2;
     pongBall ball;
 
-    if(!pong_pong_init(&game, &paddleP1, &paddleP2, &ball))
+    game.type = PONG;
+
+    if(!pong_game_init(&game, &paddleP1, &paddleP2, &ball))
     {
         utility_error_handler(prenderer, pwindow, "ERROR initializing game");
     }
@@ -309,68 +256,122 @@ void pong_pong_game(SDL_Renderer *prenderer, SDL_Window *pwindow)
     //---------------------
     //game close
 
-    free(game.score);
+    utility_free_game(&game);
 
-    
 }
 
 //------------------------------------------------
 
-SDL_bool pong_pong_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
+SDL_bool pong_game_init(game *game, pongElement *paddleP1, pongElement *paddleP2, pongBall *ball)
 {
-    //game init
-    (*game).width = DEFAULT_WINDOW_WITH;
-    (*game).height = DEFAULT_WINDOW_HEIGHT;
-    (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
-    (*game).brickNumber = 0;
-    (*game).type = 1;
-    (*game).playerNumber = 2;
-    (*game).score = NULL;
+    SDL_bool initState = SDL_FALSE;
 
-    (*game).score = calloc((*game).playerNumber, sizeof(int));
-    if((*game).score == NULL)
+    if((*game).type == BREAKOUT)
     {
-        return SDL_FALSE;
+        //game init
+        (*game).width = DEFAULT_WINDOW_WITH;
+        (*game).height = DEFAULT_WINDOW_HEIGHT;
+        (*game).padding = GAME_PADDING;
+        (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
+        (*game).brickNumber = 0;
+        (*game).brickGapX = 0;
+        (*game).brickGapY = BRICK_GAP_Y;
+        (*game).bricks = NULL;
+        (*game).playerNumber = 1;
+        (*game).score = NULL; 
+
+        (*game).score = calloc((*game).playerNumber, sizeof(int));
+        if((*game).score == NULL)
+        {
+            return SDL_FALSE;
+        }
+
+        //paddle init
+        (*paddleP1).colorRGB[0] = PADDLE_RGB_R;
+        (*paddleP1).colorRGB[1] = PADDLE_RGB_G;
+        (*paddleP1).colorRGB[2] = PADDLE_RGB_B;
+        (*paddleP1).dirX = 0;
+        (*paddleP1).dirY = 0;
+        (*paddleP1).speed = 5;
+        (*paddleP1).rectangle.x = 350;
+        (*paddleP1).rectangle.y = 570;
+        (*paddleP1).rectangle.w = 100;
+        (*paddleP1).rectangle.h = 20;
+
+        //ball init
+        (*ball).center.x = 400;
+        (*ball).center.y = 400;
+        (*ball).radius = 8;
+        (*ball).resolution = 1; //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
+        (*ball).colorRGB[0] = BALL_RGB_R;
+        (*ball).colorRGB[1] = BALL_RGB_G;
+        (*ball).colorRGB[2] = BALL_RGB_B;
+        (*ball).dirX = 0;
+        (*ball).dirY = 1;
+        (*ball).speed = 1;
+
+        initState = SDL_TRUE;
+
     }
 
+    if((*game).type == PONG)
+    {
 
-    //paddle init
-    (*paddleP1).colorRGB[0] = PADDLE_RGB_R;
-    (*paddleP1).colorRGB[1] = PADDLE_RGB_G;
-    (*paddleP1).colorRGB[2] = PADDLE_RGB_B;
-    (*paddleP1).dirX = 0;
-    (*paddleP1).dirY = 0;
-    (*paddleP1).speed = 5;
-    (*paddleP1).rectangle.x = 10;
-    (*paddleP1).rectangle.y = 300;
-    (*paddleP1).rectangle.w = 20;
-    (*paddleP1).rectangle.h = 100;
+        //game init
+        (*game).width = DEFAULT_WINDOW_WITH;
+        (*game).height = DEFAULT_WINDOW_HEIGHT;
+        (*game).delta = 5; //ball cross the height in 3 seconds = 600px/3s = 200px/1000ms = 1px/5ms = velocity -> time = 1px/velocity = 5ms
+        (*game).brickNumber = 0;
+        (*game).playerNumber = 2;
+        (*game).score = NULL;
 
-    (*paddleP2).colorRGB[0] = PADDLE_RGB_R;
-    (*paddleP2).colorRGB[1] = PADDLE_RGB_G;
-    (*paddleP2).colorRGB[2] = PADDLE_RGB_B;
-    (*paddleP2).dirX = 0;
-    (*paddleP2).dirY = 0;
-    (*paddleP2).speed = 5;
-    (*paddleP2).rectangle.x = 770;
-    (*paddleP2).rectangle.y = 300;
-    (*paddleP2).rectangle.w = 20;
-    (*paddleP2).rectangle.h = 100;
+        (*game).score = calloc((*game).playerNumber, sizeof(int));
+        if((*game).score == NULL)
+        {
+            return SDL_FALSE;
+        }
 
-    //ball init
-    (*ball).center.x = 400;
-    (*ball).center.y = 300;
-    (*ball).radius = 8;
-    (*ball).resolution = 1;  //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
-    (*ball).colorRGB[0] = BALL_RGB_R;
-    (*ball).colorRGB[1] = BALL_RGB_G;
-    (*ball).colorRGB[2] = BALL_RGB_B;
-    (*ball).dirX = 1;
-    (*ball).dirY = 0;
-    (*ball).speed = 1;
 
-    return SDL_TRUE;
+        //paddle init
+        (*paddleP1).colorRGB[0] = PADDLE_RGB_R;
+        (*paddleP1).colorRGB[1] = PADDLE_RGB_G;
+        (*paddleP1).colorRGB[2] = PADDLE_RGB_B;
+        (*paddleP1).dirX = 0;
+        (*paddleP1).dirY = 0;
+        (*paddleP1).speed = 5;
+        (*paddleP1).rectangle.x = 10;
+        (*paddleP1).rectangle.y = 300;
+        (*paddleP1).rectangle.w = 20;
+        (*paddleP1).rectangle.h = 100;
 
+        (*paddleP2).colorRGB[0] = PADDLE_RGB_R;
+        (*paddleP2).colorRGB[1] = PADDLE_RGB_G;
+        (*paddleP2).colorRGB[2] = PADDLE_RGB_B;
+        (*paddleP2).dirX = 0;
+        (*paddleP2).dirY = 0;
+        (*paddleP2).speed = 5;
+        (*paddleP2).rectangle.x = 770;
+        (*paddleP2).rectangle.y = 300;
+        (*paddleP2).rectangle.w = 20;
+        (*paddleP2).rectangle.h = 100;
+
+        //ball init
+        (*ball).center.x = 400;
+        (*ball).center.y = 300;
+        (*ball).radius = 8;
+        (*ball).resolution = 1;  //define the shape of the ball, smaller = rounder = more resource intensive. Can't go < 1 pixel.
+        (*ball).colorRGB[0] = BALL_RGB_R;
+        (*ball).colorRGB[1] = BALL_RGB_G;
+        (*ball).colorRGB[2] = BALL_RGB_B;
+        (*ball).dirX = 1;
+        (*ball).dirY = 0;
+        (*ball).speed = 1;
+
+        initState = SDL_TRUE;
+
+    }
+   
+    return initState;
 }
 
 //------------------------------------------------
